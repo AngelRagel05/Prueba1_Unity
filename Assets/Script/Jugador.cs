@@ -3,19 +3,24 @@ using UnityEngine;
 public class Jugador : MonoBehaviour
 {
     private Rigidbody rb;
-    public float speed = 5f;
+    Vector3 movementDirection;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
     }
 
+    void Update()
+    {
+
+        movementDirection.x = Input.GetAxis("Horizontal");
+        movementDirection.z = Input.GetAxis("Vertical");
+
+    }
+
     void FixedUpdate()
     {
-        float moveX = Input.GetAxis("Horizontal"); // A/D o flechas
-        float moveZ = Input.GetAxis("Vertical");   // W/S o flechas
+        rb.AddForce(movementDirection * 10f, ForceMode.Force);
 
-        Vector3 movimiento = new Vector3(moveX, 0, moveZ) * speed;
-        rb.AddForce(movimiento, ForceMode.VelocityChange);
     }
 }

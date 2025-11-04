@@ -4,7 +4,7 @@ public class Shoot : MonoBehaviour
 {
 
     [SerializeField] GameObject bulletPrefab;
-    [SerializeField] Transform shootPoint;
+    [SerializeField] Transform ShootPoint;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -23,6 +23,6 @@ public class Shoot : MonoBehaviour
     private void SpawnBullet()
     {
         Debug.Log("Disparo perra.");
-        Instantiate(bulletPrefab, shootPoint.position, Quaternion.identity);
+        Instantiate(bulletPrefab, ShootPoint.position, ShootPoint.rotation);
     }
 }

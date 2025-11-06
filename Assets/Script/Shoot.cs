@@ -2,36 +2,47 @@ using UnityEngine;
 
 public class Shoot : MonoBehaviour
 {
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Transform ShootPoint;
+    [SerializeField] private float fireRate = 0.2f; // tiempo entre disparos (0.2 = 5 balas por segundo)
 
-    [SerializeField] GameObject bulletPrefab;
-    [SerializeField] Transform ShootPoint;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
+    private float nextFireTime = 0f;
 
-    }
-
-    // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        // Si el botón izquierdo está mantenido
+        if (Input.GetMouseButton(0) && Time.time >= nextFireTime)
         {
             SpawnBullet();
+            nextFireTime = Time.time + fireRate; // Espera hasta el siguiente disparo
         }
     }
 
     private void SpawnBullet()
     {
-        // Instanciamos la bala desde el punto de disparo
-        var bullet = Instantiate(bulletPrefab, ShootPoint.position, ShootPoint.rotation);
+        // Obtenemos la dirección del ratón en el plano
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
 
-        // Ignoramos la colisión entre la bala y el propio jugador
-        Collider playerCollider = GetComponent<Collider>();
-        Collider bulletCollider = bullet.GetComponent<Collider>();
-
-        if (playerCollider != null && bulletCollider != null)
+        if (groundPlane.Raycast(ray, out float hitDist))
         {
-            Physics.IgnoreCollision(bulletCollider, playerCollider);
+            Vector3 hitPoint = ray.GetPoint(hitDist);
+
+            // Dirección horizontal
+            Vector3 direction = (hitPoint - ShootPoint.position);
+            direction.y = 0f;
+            direction.Normalize();
+
+            // Instanciamos la bala
+            Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+            GameObject bullet = Instantiate(bulletPrefab, ShootPoint.position, rotation);
+
+            // Aplicamos velocidad
+            Rigidbody rb = bullet.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.linearVelocity = direction * 50f; // velocidad ajustable
+            }
         }
     }
 }

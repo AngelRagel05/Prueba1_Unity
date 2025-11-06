@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 4596367752106521672}
   - component: {fileID: 5492336260112838921}
   - component: {fileID: 7502978369846770348}
+  - component: {fileID: -7013927434371778273}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Player
@@ -190,6 +191,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Shoot
   bulletPrefab: {fileID: 3927878934676484416, guid: 49fe4daf11de7404e98aa19cbe7b2cab, type: 3}
   ShootPoint: {fileID: 453177611970636380}
+  fireRate: 0.2
 --- !u!114 &7502978369846770348
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,6 +204,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0402325e338a69541816f2af42dc8d79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Jugador
+--- !u!114 &-7013927434371778273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2831355761979489196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3474a5e2a781ab44bc9e96166eb6a2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
+  moveSpeed: 3
 --- !u!1 &2995840059811292267
 GameObject:
   m_ObjectHideFlags: 0

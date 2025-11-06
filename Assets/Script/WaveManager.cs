@@ -1,90 +1,104 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
 public class WaveManager : MonoBehaviour
 {
-    [Header("Enemy Settings")]
-    [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private int baseEnemiesPerWave = 3;
-    [SerializeField] private int maxWaves = 20;
-    [SerializeField] private float spawnDelay = 0.5f;
-    [SerializeField] private float timeBetweenWaves = 4f;
+    [Header("Prefabs de enemigos")]
+    [SerializeField] private GameObject soldierPrefab;
+    [SerializeField] private GameObject sergeantPrefab;
+    [SerializeField] private GameObject lieutenantPrefab;
+    [SerializeField] private GameObject colonelPrefab;
 
-    [Header("Spawn Points")]
-    [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
+    [Header("Spawns")]
+    [SerializeField] private Transform[] spawnPoints;
+
+    [Header("Configuración de oleadas")]
+    [SerializeField] private int startingEnemies = 3;
+    [SerializeField] private float timeBetweenWaves = 5f;
+    [SerializeField] private int maxWaves = 20;
 
     private int currentWave = 0;
     private int enemiesAlive = 0;
     private bool spawning = false;
 
-    void Start()
+    void Update()
     {
-        StartCoroutine(StartNextWave());
+        if (enemiesAlive == 0 && !spawning && currentWave < maxWaves)
+        {
+            StartCoroutine(SpawnWave());
+        }
     }
 
-    private IEnumerator StartNextWave()
+    private IEnumerator SpawnWave()
     {
-        if (currentWave >= maxWaves)
-        {
-            Debug.Log("🏁 Has completado todas las oleadas. ¡Victoria!");
-            yield break;
-        }
-
-        currentWave++;
         spawning = true;
+        currentWave++;
+        Debug.Log($"Oleada {currentWave} iniciada.");
 
-        Debug.Log($"🔵 Iniciando oleada {currentWave}...");
+        // Cada ronda tiene más enemigos (aumenta 2 por ronda)
+        int enemiesThisWave = startingEnemies + (currentWave - 1) * 2;
 
-        // Aumenta la cantidad de enemigos por oleada (3, 5, 7, ...)
-        int enemiesToSpawn = baseEnemiesPerWave + (currentWave - 1) * 2;
-
-        // Spawnea los enemigos uno a uno
-        for (int i = 0; i < enemiesToSpawn; i++)
+        for (int i = 0; i < enemiesThisWave; i++)
         {
-            SpawnEnemy();
-            yield return new WaitForSeconds(spawnDelay);
+            Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+            GameObject enemyPrefab = GetEnemyTypeForWave(currentWave);
+            GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, Quaternion.identity);
+
+            EnemyAI ai = enemy.GetComponent<EnemyAI>();
+            if (ai != null)
+            {
+                ai.SetWaveManager(this);
+
+                // Escalado de dificultad (vida + daño según la ronda)
+                ai.maxHealth += (currentWave - 1) * 5;
+                ai.damage += (currentWave - 1);
+                ai.speed += (currentWave - 1) * 0.05f;
+            }
+
+            enemiesAlive++;
+            yield return new WaitForSeconds(0.2f);
         }
 
         spawning = false;
-        Debug.Log($"🟡 Oleada {currentWave} iniciada con {enemiesAlive} enemigos.");
     }
 
-    private void SpawnEnemy()
+    // 🧮 Determina el tipo de enemigo según la oleada
+    private GameObject GetEnemyTypeForWave(int wave)
     {
-        if (spawnPoints.Count == 0)
+        if (wave <= 5) return soldierPrefab; // 1-5 solo Soldier
+        if (wave <= 10)
+            return Random.value < 0.7f ? soldierPrefab : sergeantPrefab;
+        if (wave <= 15)
+            return Random.value < 0.6f ? sergeantPrefab : lieutenantPrefab;
+        if (wave <= 20)
         {
-            Debug.LogWarning("❌ No hay puntos de spawn asignados en el WaveManager.");
-            return;
+            float r = Random.value;
+            if (r < 0.4f) return lieutenantPrefab;
+            if (r < 0.8f) return colonelPrefab;
+            return sergeantPrefab;
         }
 
-        Transform randomSpawn = spawnPoints[Random.Range(0, spawnPoints.Count)];
-        GameObject enemy = Instantiate(enemyPrefab, randomSpawn.position, Quaternion.identity);
-
-        // Escalar dificultad: más velocidad o vida por oleada
-        EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
-        if (enemyAI != null)
-        {
-            enemyAI.speed += currentWave * 0.2f; // Más velocidad cada ronda
-            enemyAI.SetWaveManager(this);
-        }
-
-        enemiesAlive++;
+        return soldierPrefab;
     }
 
     public void EnemyDied()
     {
         enemiesAlive--;
 
-        if (enemiesAlive <= 0 && !spawning)
+        if (enemiesAlive <= 0)
         {
-            Debug.Log($"✅ Oleada {currentWave} completada.");
-            Invoke(nameof(PrepareNextWave), timeBetweenWaves);
+            Debug.Log($"Oleada {currentWave} completada.");
+
+            if (currentWave < maxWaves)
+                Invoke(nameof(NextWave), timeBetweenWaves);
+            else
+                Debug.Log("🎉 Has sobrevivido todas las oleadas!");
         }
     }
 
-    private void PrepareNextWave()
+    private void NextWave()
     {
-        StartCoroutine(StartNextWave());
+        // Este método solo inicia la siguiente oleada (el Update lo controla)
+        Debug.Log($"Preparando oleada {currentWave + 1}...");
     }
 }

@@ -2,8 +2,16 @@ using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
-    public float speed = 2f;
-    public int damage = 10; // daño que causa al tocar al jugador
+    public enum EnemyType { Soldier, Sergeant, Lieutenant, Colonel }
+    [Header("Tipo de enemigo")]
+    public EnemyType enemyType = EnemyType.Soldier;
+
+    [Header("Estadísticas")]
+    public float moveSpeed;
+    public float damage;
+    public float maxHealth;
+    private float currentHealth;
+
     private Transform player;
     private Rigidbody rb;
     private WaveManager waveManager;
@@ -12,43 +20,81 @@ public class EnemyAI : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
         rb = GetComponent<Rigidbody>();
-    }
+        waveManager = FindFirstObjectByType<WaveManager>();
 
-    public void SetWaveManager(WaveManager wm)
-    {
-        waveManager = wm;
+        // Ajusta los valores según el tipo de enemigo
+        switch (enemyType)
+        {
+            case EnemyType.Soldier:
+                moveSpeed = 3f;
+                damage = 5f;
+                maxHealth = 20f;
+                break;
+            case EnemyType.Sergeant:
+                moveSpeed = 3.5f;
+                damage = 10f;
+                maxHealth = 35f;
+                break;
+            case EnemyType.Lieutenant:
+                moveSpeed = 4f;
+                damage = 15f;
+                maxHealth = 50f;
+                break;
+            case EnemyType.Colonel:
+                moveSpeed = 4.5f;
+                damage = 25f;
+                maxHealth = 70f;
+                break;
+        }
+
+        currentHealth = maxHealth;
     }
 
     void FixedUpdate()
     {
         if (player == null) return;
 
-        Vector3 direction = (player.position - transform.position).normalized;
-        rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
-    }
+        Vector3 direction = (player.position - transform.position);
+        direction.y = 0f;
+        direction.Normalize();
 
-    public void Die()
-    {
-        if (waveManager != null)
-            waveManager.EnemyDied();
+        rb.MovePosition(transform.position + direction * moveSpeed * Time.fixedDeltaTime);
 
-        Destroy(gameObject);
+        if (direction != Vector3.zero)
+            transform.rotation = Quaternion.LookRotation(direction);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Bullet"))
         {
-            Die();
+            TakeDamage(15); // daño fijo por bala
             Destroy(collision.gameObject);
         }
-        else if (collision.gameObject.CompareTag("Player"))
+
+        if (collision.gameObject.CompareTag("Player"))
         {
-            Jugador jugador = collision.gameObject.GetComponent<Jugador>();
-            if (jugador != null)
-            {
-                jugador.TakeDamage(damage);
-            }
+            // El jugador recibe daño al tocarlo
+            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+                playerHealth.TakeDamage(damage);
         }
+    }
+
+    public void TakeDamage(float amount)
+    {
+        currentHealth -= amount;
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        if (waveManager != null)
+            waveManager.EnemyDied();
+
+        Destroy(gameObject);
     }
 }

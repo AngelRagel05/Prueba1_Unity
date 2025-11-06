@@ -154,5 +154,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3474a5e2a781ab44bc9e96166eb6a2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
-  speed: 2
-  health: 50
+  speed: 10
+  damage: 10

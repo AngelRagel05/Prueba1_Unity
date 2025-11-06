@@ -3,6 +3,7 @@ using UnityEngine;
 public class EnemyAI : MonoBehaviour
 {
     public float speed = 2f;
+    public int damage = 10; // daño que causa al tocar al jugador
     private Transform player;
     private Rigidbody rb;
     private WaveManager waveManager;
@@ -34,13 +35,20 @@ public class EnemyAI : MonoBehaviour
         Destroy(gameObject);
     }
 
-    // Detectar colisión con bala (por seguridad doble)
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Bullet"))
         {
             Die();
             Destroy(collision.gameObject);
+        }
+        else if (collision.gameObject.CompareTag("Player"))
+        {
+            Jugador jugador = collision.gameObject.GetComponent<Jugador>();
+            if (jugador != null)
+            {
+                jugador.TakeDamage(damage);
+            }
         }
     }
 }

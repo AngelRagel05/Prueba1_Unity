@@ -25,23 +25,23 @@ public class EnemyAI : MonoBehaviour
         switch (enemyType)
         {
             case EnemyType.Soldier:
-                speed = 3f;
-                damage = 10f;
+                speed = 6f;
+                damage = 5f;
                 maxHealth = 50f;
                 break;
             case EnemyType.Sergeant:
-                speed = 3.5f;
+                speed = 10f;
                 damage = 15f;
                 maxHealth = 75f;
                 break;
             case EnemyType.Lieutenant:
-                speed = 4f;
-                damage = 20f;
+                speed = 20f;
+                damage = 25f;
                 maxHealth = 100f;
                 break;
             case EnemyType.Colonel:
-                speed = 4.5f;
-                damage = 25f;
+                speed = 30f;
+                damage = 50f;
                 maxHealth = 150f;
                 break;
         }

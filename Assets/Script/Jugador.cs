@@ -3,24 +3,27 @@ using UnityEngine;
 public class Jugador : MonoBehaviour
 {
     private Rigidbody rb;
-    Vector3 movementDirection;
+    [SerializeField] private float moveSpeed = 10f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-    }
-
-    void Update()
-    {
-
-        movementDirection.x = Input.GetAxis("Horizontal");
-        movementDirection.z = Input.GetAxis("Vertical");
-
+        rb.freezeRotation = true; // evita que se vuelque con colisiones
     }
 
     void FixedUpdate()
     {
-        rb.AddForce(movementDirection * 10f, ForceMode.Force);
+        // Leer entrada del teclado
+        float horizontal = Input.GetAxisRaw("Horizontal"); // sin suavizado
+        float vertical = Input.GetAxisRaw("Vertical");     // sin suavizado
 
+        Vector3 movementDirection = new Vector3(horizontal, 0f, vertical).normalized;
+
+        if (movementDirection != Vector3.zero)
+        {
+            // Movimiento directo, sin aceleración ni inercia
+            Vector3 newPosition = rb.position + movementDirection * moveSpeed * Time.fixedDeltaTime;
+            rb.MovePosition(newPosition);
+        }
     }
 }

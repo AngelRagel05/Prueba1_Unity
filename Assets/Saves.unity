@@ -2442,10 +2442,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a921a1b8f8a1b4468fc4ff86137b69f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveManager
-  soldierPrefab: {fileID: 2831355761979489196, guid: 3e76f5ad85fa0314b8fc26970b2af8ee, type: 3}
-  sergeantPrefab: {fileID: 7679257437396180500, guid: 4cb3c069e06b8fb429a6699e143be6b5, type: 3}
-  lieutenantPrefab: {fileID: 0}
-  colonelPrefab: {fileID: 0}
   spawnPoints:
   - {fileID: 1698953590}
   - {fileID: 1926427788}
@@ -2470,9 +2466,10 @@ MonoBehaviour:
   - {fileID: 1250781844}
   - {fileID: 144016438}
   - {fileID: 1452909984}
-  startingEnemies: 3
-  timeBetweenWaves: 5
-  maxWaves: 20
+  soldierPrefab: {fileID: 2831355761979489196, guid: 3e76f5ad85fa0314b8fc26970b2af8ee, type: 3}
+  sergeantPrefab: {fileID: 7679257437396180500, guid: 4cb3c069e06b8fb429a6699e143be6b5, type: 3}
+  lieutenantPrefab: {fileID: 2849519776577595518, guid: ace7e67c57af125438c1c9f7f0b464fd, type: 3}
+  colonelPrefab: {fileID: 3932478258592014106, guid: 944b5c60add6a6a4a87f44f0cae41f31, type: 3}
 --- !u!4 &2122755079
 Transform:
   m_ObjectHideFlags: 0

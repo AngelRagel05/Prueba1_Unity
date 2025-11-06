@@ -1,62 +1,91 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class WaveManager : MonoBehaviour
 {
-    public Transform[] spawnPoints;
-    public GameObject soldierPrefab;
-    public GameObject sergeantPrefab;
-    public GameObject lieutenantPrefab;
-    public GameObject colonelPrefab;
+    [SerializeField] private Transform[] spawnPoints;
+    [SerializeField] private GameObject soldierPrefab;
+    [SerializeField] private GameObject sergeantPrefab;
+    [SerializeField] private GameObject lieutenantPrefab;
+    [SerializeField] private GameObject colonelPrefab;
 
-    private int currentWave = 0;
-    private int enemiesAlive = 0;
+    private int currentWave = 1;
+    private int enemiesRemaining;
+    private bool waveInProgress = false;
 
     private void Start()
     {
         StartCoroutine(SpawnNextWave());
     }
 
-    public void EnemyKilled()
-    {
-        enemiesAlive--;
-        if (enemiesAlive <= 0)
-        {
-            StartCoroutine(SpawnNextWave());
-        }
-    }
-
     private IEnumerator SpawnNextWave()
     {
-        currentWave++;
-        if (currentWave > 20)
+        waveInProgress = true;
+
+        int enemiesToSpawn = GetEnemiesForWave(currentWave);
+        enemiesRemaining = enemiesToSpawn;
+
+        Debug.Log($"🔸 Oleada {currentWave} comenzando con {enemiesToSpawn} enemigos.");
+
+        for (int i = 0; i < enemiesToSpawn; i++)
         {
-            Debug.Log("Has sobrevivido a todas las oleadas!");
-            yield break;
+            SpawnEnemyForWave(currentWave);
+            yield return new WaitForSeconds(0.5f);
         }
 
-        int enemyCount = Mathf.RoundToInt(3 + currentWave * 1.5f);
-        enemiesAlive = enemyCount;
-        Debug.Log("Wave " + currentWave + " spawning " + enemyCount + " enemies.");
+        waveInProgress = false;
+    }
 
-        for (int i = 0; i < enemyCount; i++)
+    private void SpawnEnemyForWave(int wave)
+    {
+        Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+
+        GameObject prefabToSpawn;
+
+        // Escalado progresivo de enemigos según la oleada
+        if (wave < 5)
+            prefabToSpawn = soldierPrefab;
+        else if (wave < 10)
+            prefabToSpawn = sergeantPrefab;
+        else if (wave < 15)
+            prefabToSpawn = lieutenantPrefab;
+        else
+            prefabToSpawn = colonelPrefab;
+
+        GameObject enemy = Instantiate(prefabToSpawn, spawnPoint.position, Quaternion.identity);
+
+        EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
+        if (enemyAI != null)
         {
-            yield return new WaitForSeconds(0.3f);
-            Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-            GameObject prefab = ChooseEnemyType();
-            GameObject enemy = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
-            EnemyAI ai = enemy.GetComponent<EnemyAI>();
-            ai.SetWaveManager(this);
+            enemyAI.SetWaveManager(this);
         }
     }
 
-    private GameObject ChooseEnemyType()
+    // 🧩 Este método lo llama cada enemigo al morir
+    public void EnemyDied()
     {
-        float r = Random.value;
-        if (currentWave < 5) return soldierPrefab;
-        if (currentWave < 10) return r < 0.7f ? soldierPrefab : sergeantPrefab;
-        if (currentWave < 15) return r < 0.5f ? sergeantPrefab : lieutenantPrefab;
-        if (currentWave < 20) return r < 0.4f ? lieutenantPrefab : colonelPrefab;
-        return colonelPrefab;
+        enemiesRemaining--;
+
+        if (enemiesRemaining <= 0 && !waveInProgress)
+        {
+            currentWave++;
+
+            if (currentWave <= 20)
+            {
+                Debug.Log($"✅ Oleada {currentWave - 1} completada. Preparando la siguiente...");
+                StartCoroutine(SpawnNextWave());
+            }
+            else
+            {
+                Debug.Log("🎉 Todas las oleadas completadas. ¡Victoria!");
+            }
+        }
+    }
+
+    private int GetEnemiesForWave(int wave)
+    {
+        // Ejemplo: crece exponencialmente (puedes ajustar)
+        return Mathf.Min(3 + (wave - 1) * 2, 50);
     }
 }

@@ -1,77 +1,93 @@
 using UnityEngine;
-using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
-    public enum EnemyType { Soldier, Sergeant, Lieutenant, Colonel }
-    public EnemyType enemyType;
+    [SerializeField] private float speed = 3f;
+    [SerializeField] private int maxHealth = 100;
+    [SerializeField] private int damage = 10;
+    [SerializeField] private EnemyType enemyType;
 
     private Transform player;
+    private int currentHealth;
     private WaveManager waveManager;
-    private PlayerHealth playerHealth;
 
-    public float speed = 3f;
-    public float damage = 10f;
-    public float maxHealth = 50f;
-    private float currentHealth;
+    public enum EnemyType
+    {
+        Soldier,
+        Sergeant,
+        Lieutenant,
+        Colonel
+    }
 
     private void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
-        playerHealth = player.GetComponent<PlayerHealth>();
         currentHealth = maxHealth;
 
-        // Ajustar stats según el tipo de enemigo
+        // Configura atributos según el tipo de enemigo
         switch (enemyType)
         {
             case EnemyType.Soldier:
-                speed = 6f;
-                damage = 5f;
-                maxHealth = 50f;
+                speed = 3f;
+                maxHealth = 50;
+                damage = 5;
                 break;
+
             case EnemyType.Sergeant:
-                speed = 10f;
-                damage = 15f;
-                maxHealth = 75f;
+                speed = 3.5f;
+                maxHealth = 100;
+                damage = 10;
                 break;
+
             case EnemyType.Lieutenant:
-                speed = 20f;
-                damage = 25f;
-                maxHealth = 100f;
+                speed = 4f;
+                maxHealth = 150;
+                damage = 15;
                 break;
+
             case EnemyType.Colonel:
-                speed = 30f;
-                damage = 50f;
-                maxHealth = 150f;
+                speed = 4.5f;
+                maxHealth = 250;
+                damage = 25;
                 break;
         }
+
         currentHealth = maxHealth;
     }
 
     private void Update()
     {
         if (player == null) return;
-        transform.position = Vector3.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
-        transform.LookAt(player.position);
+
+        // Movimiento hacia el jugador
+        Vector3 direction = (player.position - transform.position).normalized;
+        transform.position += direction * speed * Time.deltaTime;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Bullet"))
-        {
-            TakeDamage(25f);
-            Destroy(collision.gameObject);
-        }
-
+        // Si toca al jugador → hace daño
         if (collision.gameObject.CompareTag("Player"))
         {
-            playerHealth.TakeDamage(damage);
+            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(damage);
+            }
+        }
+
+        // Si choca con una bala → recibe daño y muere si llega a 0
+        if (collision.gameObject.CompareTag("Bullet"))
+        {
+            TakeDamage(50); // Puedes ajustar el daño de las balas aquí
+            Destroy(collision.gameObject); // Destruye la bala al impactar
         }
     }
 
-    public void TakeDamage(float amount)
+    public void TakeDamage(int amount)
     {
         currentHealth -= amount;
+
         if (currentHealth <= 0)
         {
             Die();
@@ -80,7 +96,11 @@ public class EnemyAI : MonoBehaviour
 
     private void Die()
     {
-        waveManager?.EnemyKilled();
+        if (waveManager != null)
+        {
+            waveManager.EnemyDied();
+        }
+
         Destroy(gameObject);
     }
 

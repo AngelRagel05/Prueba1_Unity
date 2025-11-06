@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 3f;
+    public float speed = 2f;
     private Transform player;
     private Rigidbody rb;
+    private WaveManager waveManager;
 
     void Start()
     {
@@ -12,30 +13,34 @@ public class EnemyAI : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    public void SetWaveManager(WaveManager wm)
+    {
+        waveManager = wm;
+    }
+
     void FixedUpdate()
     {
         if (player == null) return;
 
-        // Dirección horizontal hacia el jugador
-        Vector3 direction = (player.position - transform.position);
-        direction.y = 0f;
-        direction.Normalize();
-
-        // Movimiento directo
-        rb.MovePosition(transform.position + direction * moveSpeed * Time.fixedDeltaTime);
-
-        // Rotar hacia el jugador (opcional, pero queda mejor)
-        if (direction != Vector3.zero)
-            transform.rotation = Quaternion.LookRotation(direction);
+        Vector3 direction = (player.position - transform.position).normalized;
+        rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
     }
 
+    public void Die()
+    {
+        if (waveManager != null)
+            waveManager.EnemyDied();
+
+        Destroy(gameObject);
+    }
+
+    // Detectar colisión con bala (por seguridad doble)
     private void OnCollisionEnter(Collision collision)
     {
-        // Si la bala toca al enemigo, lo destruimos
         if (collision.gameObject.CompareTag("Bullet"))
         {
-            Destroy(collision.gameObject); // destruye la bala
-            Destroy(gameObject);           // destruye el enemigo
+            Die();
+            Destroy(collision.gameObject);
         }
     }
 }

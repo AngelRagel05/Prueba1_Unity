@@ -3,8 +3,7 @@ using UnityEngine;
 public class BulletBehaviour : MonoBehaviour
 {
     Rigidbody rb;
-    [SerializeField] float bulletSpeed = 30f;
-    [SerializeField] float impactForce = 10f;
+    [SerializeField] float bulletSpeed = 50f;
     [SerializeField] float lifeTime = 3f;
 
     void Start()
@@ -14,23 +13,16 @@ public class BulletBehaviour : MonoBehaviour
         // Lanza la bala hacia adelante según su rotación
         rb.AddForce(transform.forward * bulletSpeed, ForceMode.VelocityChange);
 
-        // Se destruye sola tras unos segundos para no dejar basura en la escena
+        // Se destruye sola tras unos segundos por seguridad
         Destroy(gameObject, lifeTime);
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision collision)
     {
-        // Si choca con un enemigo, aplicamos fuerza sin destruir la bala
-        if (other.CompareTag("Enemy"))
+        if (collision.gameObject.CompareTag("Enemy"))
         {
-            Rigidbody enemyRb = other.attachedRigidbody;
-
-            if (enemyRb != null)
-            {
-                // Empuja al enemigo en la dirección de la bala
-                Vector3 direction = transform.forward;
-                enemyRb.AddForce(direction * impactForce, ForceMode.Impulse);
-            }
+            Destroy(collision.gameObject); // Destruye al enemigo
+            Destroy(gameObject);           // Destruye la bala
         }
     }
 }

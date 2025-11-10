@@ -153,6 +153,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
   enemyType: 1
-  speed: 20
+  speed: 12.5
   maxHealth: 100
   damage: 10

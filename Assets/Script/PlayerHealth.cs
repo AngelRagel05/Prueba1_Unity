@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // Solo si quieres reiniciar la escena al morir
+using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -7,28 +7,23 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private int maxHealth = 100;
     private int currentHealth;
 
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+
     private void Start()
     {
         currentHealth = maxHealth;
-        Debug.Log($"[PlayerHealth] Vida inicial: {currentHealth}");
     }
 
     public void TakeDamage(int amount)
     {
         currentHealth -= amount;
-        Debug.Log($"[PlayerHealth] Daño recibido: {amount}, vida restante: {currentHealth}");
-
         if (currentHealth <= 0)
-        {
             Die();
-        }
     }
 
     private void Die()
     {
-        Debug.Log("[PlayerHealth] 💀 El jugador ha muerto!");
-
-        // Ejemplo: reiniciar la escena
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

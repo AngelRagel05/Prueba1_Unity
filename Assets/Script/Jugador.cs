@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Jugador : MonoBehaviour
@@ -11,53 +10,62 @@ public class Jugador : MonoBehaviour
     [SerializeField] private float moveSpeed = 10f;
 
     [Header("Dash")]
-    [SerializeField] private float dashForce = 30f;     // fuerza del dash
-    [SerializeField] private float dashDuration = 0.2f; // cuánto dura el dash
-    [SerializeField] private float dashCooldown = 1.5f; // tiempo entre dashes
+    [SerializeField] private float dashForce = 30f;     
+    [SerializeField] private float dashDuration = 0.2f; 
+    [SerializeField] private float dashCooldown = 1.5f; 
 
     private bool isDashing = false;
     private bool canDash = true;
-    private float dashEndTime;
     private TrailRenderer trail;
 
+    // Para la barra de dash
+    public bool CanDash => canDash;
+    public float TimeUntilDash { get; private set; }
+    public float DashCooldown => dashCooldown;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        trail = GetComponent<TrailRenderer>(); // <-- AQUÍ SE INICIALIZA
+        trail = GetComponent<TrailRenderer>();
 
         if (trail != null)
             trail.emitting = false;
-    }
 
+        TimeUntilDash = 0f;
+    }
 
     void Update()
     {
-        // movimiento normal
+        // Movimiento
         movementDirection.x = Input.GetAxisRaw("Horizontal");
         movementDirection.z = Input.GetAxisRaw("Vertical");
         movementDirection.Normalize();
 
-        // iniciar dash
+        // Dash
         if (Input.GetKeyDown(KeyCode.Space) && canDash && movementDirection != Vector3.zero)
         {
             StartCoroutine(Dash());
+        }
+
+        // Contador de cooldown
+        if (!canDash && !isDashing)
+        {
+            TimeUntilDash -= Time.deltaTime;
+            if (TimeUntilDash < 0f) TimeUntilDash = 0f;
         }
     }
 
     void FixedUpdate()
     {
         if (!isDashing)
-        {
-            // movimiento normal sin inercia
             rb.linearVelocity = movementDirection * moveSpeed;
-        }
     }
 
     private IEnumerator Dash()
     {
         isDashing = true;
         canDash = false;
+        TimeUntilDash = dashCooldown;
 
         if (trail != null)
             trail.emitting = true;
@@ -75,9 +83,12 @@ public class Jugador : MonoBehaviour
         if (trail != null)
             trail.emitting = false;
 
-        yield return new WaitForSeconds(dashCooldown);
+        while (TimeUntilDash > 0)
+        {
+            TimeUntilDash -= Time.deltaTime;
+            yield return null;
+        }
+
         canDash = true;
     }
-
-
 }

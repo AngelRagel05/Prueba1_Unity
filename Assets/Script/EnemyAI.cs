@@ -2,92 +2,112 @@ using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
-    [SerializeField] private float speed = 3f;
-    [SerializeField] private int maxHealth = 100;
-    [SerializeField] private int damage = 10;
-    [SerializeField] private EnemyType enemyType;
+    public enum EnemyType { Soldier, Sergeant, Lieutenant, Colonel }
 
-    private Transform player;
+    [Header("Tipo (selecciona en el prefab)")]
+    public EnemyType enemyType = EnemyType.Soldier;
+
+    [Header("Stats (se asignan automáticamente según el tipo)")]
+    [SerializeField] private float speed = 3f;
+    [SerializeField] private int maxHealth = 50;
+    [SerializeField] private int damage = 5;
+
     private int currentHealth;
+    private Transform player;
     private WaveManager waveManager;
 
-    public enum EnemyType
+    private void Awake()
     {
-        Soldier,
-        Sergeant,
-        Lieutenant,
-        Colonel
+        // Aplicamos las stats desde el tipo lo antes posible
+        ApplyTypeSettings();
     }
 
     private void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
         currentHealth = maxHealth;
 
-        // Configura atributos según el tipo de enemigo
+        Debug.Log($"[EnemyAI] Spawned as {enemyType} | speed={speed} health={maxHealth} damage={damage}");
+    }
+
+    // Esto permite que cuando cambies el enum en el prefab en el editor, se actualicen los campos ahí mismo
+    private void OnValidate()
+    {
+        ApplyTypeSettings();
+    }
+
+    private void ApplyTypeSettings()
+    {
         switch (enemyType)
         {
             case EnemyType.Soldier:
-                speed = 3f;
+                speed = 10f;
                 maxHealth = 50;
                 damage = 5;
                 break;
 
             case EnemyType.Sergeant:
-                speed = 3.5f;
+                speed = 12.5f;
                 maxHealth = 100;
                 damage = 10;
                 break;
 
             case EnemyType.Lieutenant:
-                speed = 4f;
+                speed = 15f;
                 maxHealth = 150;
-                damage = 15;
+                damage = 20;
                 break;
 
             case EnemyType.Colonel:
-                speed = 4.5f;
+                speed = 20f;
                 maxHealth = 250;
-                damage = 25;
+                damage = 50;
                 break;
         }
 
-        currentHealth = maxHealth;
+        // si quieres ver los cambios inmediatos en el editor:
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
     }
 
-    private void Update()
+    public void SetWaveManager(WaveManager manager)
+    {
+        waveManager = manager;
+    }
+
+    private void FixedUpdate()
     {
         if (player == null) return;
 
-        // Movimiento hacia el jugador
-        Vector3 direction = (player.position - transform.position).normalized;
-        transform.position += direction * speed * Time.deltaTime;
+        Vector3 dir = (player.position - transform.position);
+        dir.y = 0f;
+        dir.Normalize();
+
+        transform.position += dir * speed * Time.fixedDeltaTime;
+        if (dir != Vector3.zero) transform.rotation = Quaternion.LookRotation(dir);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        // Si toca al jugador → hace daño
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage(damage);
-            }
-        }
-
-        // Si choca con una bala → recibe daño y muere si llega a 0
         if (collision.gameObject.CompareTag("Bullet"))
         {
-            TakeDamage(50); // Puedes ajustar el daño de las balas aquí
-            Destroy(collision.gameObject); // Destruye la bala al impactar
+            // daño fijo por ejemplo — puedes cambiarlo o usar damage
+            TakeDamage(50);
+            Destroy(collision.gameObject);
+        }
+
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            var ph = collision.gameObject.GetComponent<PlayerHealth>();
+            if (ph != null)
+                ph.TakeDamage(damage);
         }
     }
 
     public void TakeDamage(int amount)
     {
         currentHealth -= amount;
-
         if (currentHealth <= 0)
         {
             Die();
@@ -96,16 +116,7 @@ public class EnemyAI : MonoBehaviour
 
     private void Die()
     {
-        if (waveManager != null)
-        {
-            waveManager.EnemyDied();
-        }
-
+        waveManager?.EnemyDied();
         Destroy(gameObject);
-    }
-
-    public void SetWaveManager(WaveManager manager)
-    {
-        waveManager = manager;
     }
 }

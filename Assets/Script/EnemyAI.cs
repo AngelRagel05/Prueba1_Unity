@@ -7,7 +7,7 @@ public class EnemyAI : MonoBehaviour
     [Header("Tipo (selecciona en el prefab)")]
     public EnemyType enemyType = EnemyType.Soldier;
 
-    [Header("Stats (se asignan automáticamente según el tipo)")]
+    [Header("Stats automáticos según el tipo")]
     [SerializeField] private float speed = 3f;
     [SerializeField] private int maxHealth = 50;
     [SerializeField] private int damage = 5;
@@ -18,19 +18,19 @@ public class EnemyAI : MonoBehaviour
 
     private void Awake()
     {
-        // Aplicamos las stats desde el tipo lo antes posible
         ApplyTypeSettings();
+        currentHealth = maxHealth;
     }
 
     private void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        currentHealth = maxHealth;
+        if (waveManager == null)
+            waveManager = FindObjectOfType<WaveManager>();
 
-        Debug.Log($"[EnemyAI] Spawned as {enemyType} | speed={speed} health={maxHealth} damage={damage}");
+        Debug.Log($"[EnemyAI] Spawned {enemyType} | HP={maxHealth} | Speed={speed} | Damage={damage}");
     }
 
-    // Esto permite que cuando cambies el enum en el prefab en el editor, se actualicen los campos ahí mismo
     private void OnValidate()
     {
         ApplyTypeSettings();
@@ -64,8 +64,6 @@ public class EnemyAI : MonoBehaviour
                 damage = 50;
                 break;
         }
-
-        // si quieres ver los cambios inmediatos en el editor:
 #if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(this);
 #endif
@@ -85,29 +83,44 @@ public class EnemyAI : MonoBehaviour
         dir.Normalize();
 
         transform.position += dir * speed * Time.fixedDeltaTime;
-        if (dir != Vector3.zero) transform.rotation = Quaternion.LookRotation(dir);
+        if (dir != Vector3.zero)
+            transform.rotation = Quaternion.LookRotation(dir);
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("Bullet"))
+        if (other.CompareTag("Bullet"))
         {
-            // daño fijo por ejemplo — puedes cambiarlo o usar damage
             TakeDamage(50);
-            Destroy(collision.gameObject);
+            Destroy(other.gameObject); // destruye la bala
         }
 
-        if (collision.gameObject.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
-            var ph = collision.gameObject.GetComponent<PlayerHealth>();
+            var ph = other.GetComponent<PlayerHealth>();
             if (ph != null)
                 ph.TakeDamage(damage);
         }
     }
 
+
+    // --- Sistema para evitar daño doble ---
+    private bool _hasBeenHitRecently = false;
+
+    private System.Collections.IEnumerator HandleSingleHit()
+    {
+        _hasBeenHitRecently = true;
+        TakeDamage(50);
+        yield return new WaitForSeconds(0.1f); // Pequeña ventana de seguridad
+        _hasBeenHitRecently = false;
+    }
+
+    // --- Daño y muerte ---
     public void TakeDamage(int amount)
     {
         currentHealth -= amount;
+        Debug.Log($"[EnemyAI] {enemyType} recibió {amount} daño. Vida restante: {currentHealth}");
+
         if (currentHealth <= 0)
         {
             Die();
@@ -116,7 +129,18 @@ public class EnemyAI : MonoBehaviour
 
     private void Die()
     {
-        waveManager?.EnemyDied();
+        Debug.Log($"[EnemyAI] {enemyType} ha muerto (notificando al WaveManager).");
+
+        if (waveManager != null)
+        {
+            waveManager.EnemyDied();
+            Debug.Log($"[EnemyAI] {enemyType} notificó EnemyDied() correctamente.");
+        }
+        else
+        {
+            Debug.LogWarning($"[EnemyAI] {enemyType} murió sin WaveManager asignado.");
+        }
+
         Destroy(gameObject);
     }
 }

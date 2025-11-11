@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class EnemyAI : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class EnemyAI : MonoBehaviour
     private int currentHealth;
     private Transform player;
     private WaveManager waveManager;
+
+    [Header("Cooldown de daño al jugador")]
+    [SerializeField] private float hitCooldown = 0.5f;
+    private bool _hasBeenHitRecently = false;
 
     private void Awake()
     {
@@ -95,42 +100,39 @@ public class EnemyAI : MonoBehaviour
             Destroy(other.gameObject);
         }
 
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && !_hasBeenHitRecently)
         {
             var ph = other.GetComponent<PlayerHealth>();
             if (ph != null)
             {
                 ph.TakeDamage(damage);
                 Debug.Log($"[EnemyAI] {enemyType} hizo {damage} daño al jugador (Trigger).");
+                StartCoroutine(HandleSingleHit());
             }
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player") && !_hasBeenHitRecently)
         {
             var ph = collision.gameObject.GetComponent<PlayerHealth>();
             if (ph != null)
             {
                 ph.TakeDamage(damage);
                 Debug.Log($"[EnemyAI] {enemyType} hizo {damage} daño al jugador (Collision).");
+                StartCoroutine(HandleSingleHit());
             }
         }
     }
 
-    // --- Sistema para evitar daño doble ---
-    private bool _hasBeenHitRecently = false;
-
-    private System.Collections.IEnumerator HandleSingleHit()
+    private IEnumerator HandleSingleHit()
     {
         _hasBeenHitRecently = true;
-        TakeDamage(50);
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(hitCooldown);
         _hasBeenHitRecently = false;
     }
 
-    // --- Daño y muerte ---
     public void TakeDamage(int amount)
     {
         currentHealth -= amount;

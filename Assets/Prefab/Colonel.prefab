@@ -156,3 +156,4 @@ MonoBehaviour:
   speed: 20
   maxHealth: 250
   damage: 50
+  hitCooldown: 0.5

@@ -59,7 +59,6 @@ public class Jugador : MonoBehaviour
             dashReadyLogged = true;
         }
 
-        Debug.Log($"[Jugador] TimeUntilDash = {TimeUntilDash:F2} | CanDash = {CanDash}");
     }
     
     void FixedUpdate()

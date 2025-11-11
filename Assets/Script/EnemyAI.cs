@@ -92,17 +92,32 @@ public class EnemyAI : MonoBehaviour
         if (other.CompareTag("Bullet"))
         {
             TakeDamage(50);
-            Destroy(other.gameObject); // destruye la bala
+            Destroy(other.gameObject);
         }
 
         if (other.CompareTag("Player"))
         {
             var ph = other.GetComponent<PlayerHealth>();
             if (ph != null)
+            {
                 ph.TakeDamage(damage);
+                Debug.Log($"[EnemyAI] {enemyType} hizo {damage} daño al jugador (Trigger).");
+            }
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            var ph = collision.gameObject.GetComponent<PlayerHealth>();
+            if (ph != null)
+            {
+                ph.TakeDamage(damage);
+                Debug.Log($"[EnemyAI] {enemyType} hizo {damage} daño al jugador (Collision).");
+            }
+        }
+    }
 
     // --- Sistema para evitar daño doble ---
     private bool _hasBeenHitRecently = false;
@@ -111,7 +126,7 @@ public class EnemyAI : MonoBehaviour
     {
         _hasBeenHitRecently = true;
         TakeDamage(50);
-        yield return new WaitForSeconds(0.1f); // Pequeña ventana de seguridad
+        yield return new WaitForSeconds(0.1f);
         _hasBeenHitRecently = false;
     }
 
@@ -122,9 +137,7 @@ public class EnemyAI : MonoBehaviour
         Debug.Log($"[EnemyAI] {enemyType} recibió {amount} daño. Vida restante: {currentHealth}");
 
         if (currentHealth <= 0)
-        {
             Die();
-        }
     }
 
     private void Die()

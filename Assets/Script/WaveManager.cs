@@ -17,13 +17,16 @@ public class WaveManager : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("[WaveManager] Iniciando el sistema de oleadas...");
         StartCoroutine(SpawnNextWave());
     }
 
     private IEnumerator SpawnNextWave()
     {
         waveInProgress = true;
+
+        // 🔹 Actualiza el texto de UI al comenzar la oleada
+        if (UIManager.Instance != null)
+            UIManager.Instance.UpdateWaveText(currentWave);
 
         int enemiesToSpawn = GetEnemiesForWave(currentWave);
         enemiesRemaining = enemiesToSpawn;
@@ -48,15 +51,25 @@ public class WaveManager : MonoBehaviour
         waveInProgress = false;
         currentWave++;
 
+        // 🔹 Log de cambio de ronda
+        Debug.Log($"[WaveManager] Pasando a la siguiente oleada: {currentWave}");
+
         if (currentWave <= 20)
         {
             Debug.Log($"[WaveManager] Preparando siguiente oleada: {currentWave}");
             yield return new WaitForSeconds(3f);
+
+            // 🔹 Actualiza el texto antes de iniciar la nueva oleada
+            if (UIManager.Instance != null)
+                UIManager.Instance.UpdateWaveText(currentWave);
+
             StartCoroutine(SpawnNextWave());
         }
         else
         {
             Debug.Log("[WaveManager] Todas las oleadas completadas. ¡Victoria!");
+            if (UIManager.Instance != null)
+                UIManager.Instance.UpdateWaveText(-1); // opcional: muestra “¡Victoria!”
         }
     }
 
@@ -78,31 +91,16 @@ public class WaveManager : MonoBehaviour
 
         EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
         if (enemyAI != null)
-        {
             enemyAI.SetWaveManager(this);
-            Debug.Log($"[WaveManager] Spawned {enemyAI.enemyType} en {spawnPoint.name} (Wave {wave})");
-        }
-        else
-        {
-            Debug.LogWarning("[WaveManager] Enemy instanciado sin EnemyAI.");
-        }
     }
 
     public void EnemyDied()
     {
         enemiesRemaining--;
-        Debug.Log($"[WaveManager] EnemyDied() recibido. Restan: {enemiesRemaining}");
-
-        if (enemiesRemaining <= 0)
-        {
-            Debug.Log("[WaveManager] Todos los enemigos eliminados. Oleada completada.");
-        }
     }
 
     private int GetEnemiesForWave(int wave)
     {
-        int count = Mathf.Min(3 + (wave - 1) * 2, 50);
-        Debug.Log($"[WaveManager] Oleada {wave}: se generarán {count} enemigos.");
-        return count;
+        return Mathf.Min(3 + (wave - 1) * 2, 50);
     }
 }

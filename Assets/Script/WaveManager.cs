@@ -3,11 +3,19 @@ using UnityEngine;
 
 public class WaveManager : MonoBehaviour
 {
+    [Header("Spawns y Prefabs")]
     [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private GameObject soldierPrefab;
     [SerializeField] private GameObject sergeantPrefab;
     [SerializeField] private GameObject lieutenantPrefab;
     [SerializeField] private GameObject colonelPrefab;
+
+    [Header("Configuración de Oleadas")]
+    [SerializeField] private int enemiesInFirstWave;
+    [SerializeField] private int maxEnemiesPerWave;
+    [SerializeField] private float enemySpawnDelay;     // ⏱ tiempo entre enemigos
+    [SerializeField] private float waveDelay;             // ⏳ tiempo entre oleadas
+    [SerializeField] private int waveEnemyIncrement;       // ➕ enemigos adicionales por ronda
 
     private int currentWave = 1;
     private int enemiesRemaining;
@@ -24,42 +32,34 @@ public class WaveManager : MonoBehaviour
     {
         waveInProgress = true;
 
-        // 🔹 Actualiza el texto de UI al comenzar la oleada
         if (UIManager.Instance != null)
             UIManager.Instance.UpdateWaveText(currentWave);
 
         int enemiesToSpawn = GetEnemiesForWave(currentWave);
         enemiesRemaining = enemiesToSpawn;
 
-        Debug.Log($"[WaveManager] === OLEADA {currentWave} ===");
-        Debug.Log($"[WaveManager] Enemigos a spawnear: {enemiesToSpawn}");
+        Debug.Log($"[WaveManager] === OLEADA {currentWave} === ({enemiesToSpawn} enemigos)");
 
         for (int i = 0; i < enemiesToSpawn; i++)
         {
             SpawnEnemyForWave(currentWave);
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(enemySpawnDelay); // 👈 ajustable desde Unity
         }
 
-        // Espera hasta que todos los enemigos mueran
         while (enemiesRemaining > 0)
         {
             yield return null;
         }
 
         Debug.Log($"[WaveManager] Oleada {currentWave} completada.");
-
         waveInProgress = false;
         currentWave++;
 
-        // 🔹 Log de cambio de ronda
-        Debug.Log($"[WaveManager] Pasando a la siguiente oleada: {currentWave}");
-
         if (currentWave <= 20)
         {
-            Debug.Log($"[WaveManager] Preparando siguiente oleada: {currentWave}");
-            yield return new WaitForSeconds(3f);
+            Debug.Log($"[WaveManager] Esperando {waveDelay}s antes de la siguiente oleada.");
+            yield return new WaitForSeconds(waveDelay); // 👈 ajustable desde Unity
 
-            // 🔹 Actualiza el texto antes de iniciar la nueva oleada
             if (UIManager.Instance != null)
                 UIManager.Instance.UpdateWaveText(currentWave);
 
@@ -69,7 +69,7 @@ public class WaveManager : MonoBehaviour
         {
             Debug.Log("[WaveManager] Todas las oleadas completadas. ¡Victoria!");
             if (UIManager.Instance != null)
-                UIManager.Instance.UpdateWaveText(-1); // opcional: muestra “¡Victoria!”
+                UIManager.Instance.UpdateWaveText(-1);
         }
     }
 
@@ -88,7 +88,6 @@ public class WaveManager : MonoBehaviour
             prefabToSpawn = colonelPrefab;
 
         GameObject enemy = Instantiate(prefabToSpawn, spawnPoint.position, Quaternion.identity);
-
         EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
         if (enemyAI != null)
             enemyAI.SetWaveManager(this);
@@ -101,6 +100,6 @@ public class WaveManager : MonoBehaviour
 
     private int GetEnemiesForWave(int wave)
     {
-        return Mathf.Min(3 + (wave - 1) * 2, 50);
+        return Mathf.Min(enemiesInFirstWave + (wave - 1) * waveEnemyIncrement, maxEnemiesPerWave);
     }
 }

@@ -153,4 +153,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BulletBehaviour
   bulletSpeed: 15
-  lifeTime: 3
+  lifeTime: 2

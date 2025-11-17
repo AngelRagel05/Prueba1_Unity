@@ -1,8 +1,11 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
 {
+    public PlayerSoundController playerSoundController;
+
     [Header("Atributos de vida del jugador")]
     [SerializeField] private int maxHealth = 100;
     private int currentHealth;
@@ -18,12 +21,21 @@ public class PlayerHealth : MonoBehaviour
     public void TakeDamage(int amount)
     {
         currentHealth -= amount;
+
         if (currentHealth <= 0)
-            Die();
+        {
+            StartCoroutine(DieRoutine());
+        }
     }
 
-    private void Die()
+    private IEnumerator DieRoutine()
     {
+        playerSoundController.playDeath();
+
+        // 🔹 Espera a que termine el sonido
+        yield return new WaitForSeconds(playerSoundController.deathSound.length);
+
+        // 🔹 Reinicia la escena después del sonido
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

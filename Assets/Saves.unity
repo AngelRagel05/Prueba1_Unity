@@ -1498,8 +1498,8 @@ TrailRenderer:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0
-        value: 1
+        time: 0.0019264221
+        value: 0.71489334
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -3684,9 +3684,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61adb1fcc13ac1c44a968cf7c2d9e8c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenu
-  menuPanel: {fileID: 0}
-  gameplayUI: {fileID: 0}
-  player: {fileID: 0}
+  menuPanel: {fileID: 97651146}
+  gameplayUI: {fileID: 1646270197}
+  player: {fileID: 493120131}
 --- !u!1 &1632105966
 GameObject:
   m_ObjectHideFlags: 0
@@ -4813,9 +4813,9 @@ MonoBehaviour:
   colonelPrefab: {fileID: 3932478258592014106, guid: 944b5c60add6a6a4a87f44f0cae41f31, type: 3}
   enemiesInFirstWave: 5
   maxEnemiesPerWave: 500
-  enemySpawnDelay: 0.1
+  enemySpawnDelay: 0
   waveDelay: 2
-  waveEnemyIncrement: 10
+  waveEnemyIncrement: 2
 --- !u!4 &2122755079
 Transform:
   m_ObjectHideFlags: 0

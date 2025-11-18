@@ -10,9 +10,7 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
-        // Pausa el juego al iniciar
-        Time.timeScale = 0f;
-
+        // Solo inicializa la UI, no pausamos el juego todavía
         if (menuPanel != null)
             menuPanel.SetActive(true);
         else
@@ -26,22 +24,39 @@ public class MainMenu : MonoBehaviour
         if (player != null)
             player.SetActive(false);
 
-        // Reproducir música solo si SoundManager existe
+        // Reproducir música de menú si SoundManager existe
         if (SoundManager.Instance != null)
             SoundManager.Instance.PlayMenuMusic();
         else
             Debug.LogWarning("SoundManager no encontrado - el juego continuará sin audio");
+
+        // Pausar el juego solo cuando mostramos el menú
+        PauseGame();
+    }
+
+    private void PauseGame()
+    {
+        Time.timeScale = 0f; // Pausa la física y animaciones
+    }
+
+    private void ResumeGame()
+    {
+        Time.timeScale = 1f; // Reanuda todo
     }
 
     public void Jugar()
     {
         Debug.Log("[MainMenu] Jugar presionado, iniciando partida...");
-        Time.timeScale = 1f;
+
+        // Reanudar juego
+        ResumeGame();
+
         menuPanel.SetActive(false);
         gameplayUI.SetActive(true);
         if (player != null) player.SetActive(true);
 
-        if (SoundManager.Instance != null) SoundManager.Instance.StartGameplayMusic();
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.StartGameplayMusic();
     }
 
     public void Ajustes()

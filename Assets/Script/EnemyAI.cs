@@ -31,7 +31,7 @@ public class EnemyAI : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
         if (waveManager == null)
-            waveManager = FindObjectOfType<WaveManager>();
+            waveManager = Object.FindFirstObjectByType<WaveManager>();
 
         Debug.Log($"[EnemyAI] Spawned {enemyType} | HP={maxHealth} | Speed={speed} | Damage={damage}");
     }

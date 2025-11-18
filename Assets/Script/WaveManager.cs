@@ -30,6 +30,12 @@ public class WaveManager : MonoBehaviour
 
     private IEnumerator SpawnNextWave()
     {
+        if (waveInProgress)
+        {
+            Debug.LogWarning("[WaveManager] Ya hay una oleada en progreso, ignorando llamada duplicada.");
+            yield break;
+        }
+
         waveInProgress = true;
 
         if (UIManager.Instance != null)
@@ -43,7 +49,7 @@ public class WaveManager : MonoBehaviour
         for (int i = 0; i < enemiesToSpawn; i++)
         {
             SpawnEnemyForWave(currentWave);
-            yield return new WaitForSeconds(enemySpawnDelay); // 👈 ajustable desde Unity
+            yield return new WaitForSeconds(enemySpawnDelay);
         }
 
         while (enemiesRemaining > 0)
@@ -58,7 +64,7 @@ public class WaveManager : MonoBehaviour
         if (currentWave <= 20)
         {
             Debug.Log($"[WaveManager] Esperando {waveDelay}s antes de la siguiente oleada.");
-            yield return new WaitForSeconds(waveDelay); // 👈 ajustable desde Unity
+            yield return new WaitForSeconds(waveDelay);
 
             if (UIManager.Instance != null)
                 UIManager.Instance.UpdateWaveText(currentWave);

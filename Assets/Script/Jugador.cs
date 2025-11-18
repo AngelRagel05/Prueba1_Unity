@@ -60,7 +60,7 @@ public class Jugador : MonoBehaviour
         }
 
     }
-    
+
     void FixedUpdate()
     {
         if (!isDashing)
@@ -71,7 +71,9 @@ public class Jugador : MonoBehaviour
     {
         isDashing = true;
         TimeUntilDash = dashCooldown; // inicia cooldown
-        SoundManager.Instance.PlayDash();
+
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayDash();
+
         Debug.Log("[Jugador] Dash usado! Iniciando cooldown.");
 
         if (trail != null)

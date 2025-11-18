@@ -12,10 +12,25 @@ public class MainMenu : MonoBehaviour
     {
         // Pausa el juego al iniciar
         Time.timeScale = 0f;
-        menuPanel.SetActive(true);
-        gameplayUI.SetActive(false);
-        if (player != null) player.SetActive(false);
-        SoundManager.Instance.PlayMenuMusic();
+
+        if (menuPanel != null)
+            menuPanel.SetActive(true);
+        else
+            Debug.LogError("menuPanel no asignado en MainMenu!");
+
+        if (gameplayUI != null)
+            gameplayUI.SetActive(false);
+        else
+            Debug.LogError("gameplayUI no asignado en MainMenu!");
+
+        if (player != null)
+            player.SetActive(false);
+
+        // Reproducir música solo si SoundManager existe
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.PlayMenuMusic();
+        else
+            Debug.LogWarning("SoundManager no encontrado - el juego continuará sin audio");
     }
 
     public void Jugar()
@@ -26,7 +41,7 @@ public class MainMenu : MonoBehaviour
         gameplayUI.SetActive(true);
         if (player != null) player.SetActive(true);
 
-        SoundManager.Instance.StartGameplayMusic();
+        if (SoundManager.Instance != null) SoundManager.Instance.StartGameplayMusic();
     }
 
     public void Ajustes()

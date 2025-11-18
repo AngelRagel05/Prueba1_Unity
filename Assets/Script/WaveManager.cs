@@ -13,18 +13,29 @@ public class WaveManager : MonoBehaviour
     [Header("Configuración de Oleadas")]
     [SerializeField] private int enemiesInFirstWave;
     [SerializeField] private int maxEnemiesPerWave;
-    [SerializeField] private float enemySpawnDelay;     // ⏱ tiempo entre enemigos
-    [SerializeField] private float waveDelay;             // ⏳ tiempo entre oleadas
-    [SerializeField] private int waveEnemyIncrement;       // ➕ enemigos adicionales por ronda
+    [SerializeField] private float enemySpawnDelay;
+    [SerializeField] private float waveDelay;
+    [SerializeField] private int waveEnemyIncrement;
 
     private int currentWave = 1;
     private int enemiesRemaining;
     private bool waveInProgress = false;
+    private bool gameStarted = false; // ← NUEVO
 
     public int CurrentWave => currentWave;
 
-    private void Start()
+    // NO iniciar en Start(), esperar llamada manual
+    // private void Start() <- BORRAR ESTO
+    // {
+    //     StartCoroutine(SpawnNextWave());
+    // }
+
+    // Método público para iniciar el juego
+    public void StartGame()
     {
+        if (gameStarted) return; // Evitar múltiples llamadas
+        
+        gameStarted = true;
         StartCoroutine(SpawnNextWave());
     }
 

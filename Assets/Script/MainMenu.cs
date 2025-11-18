@@ -48,7 +48,7 @@ public class MainMenu : MonoBehaviour
     {
         Debug.Log("[MainMenu] Jugar presionado, iniciando partida...");
 
-        Time.timeScale = 1f; // Asegurarse de que el juego no esté pausado
+        Time.timeScale = 1f;
 
         menuPanel.SetActive(false);
         gameplayUI.SetActive(true);
@@ -56,6 +56,13 @@ public class MainMenu : MonoBehaviour
 
         if (SoundManager.Instance != null)
             SoundManager.Instance.StartGameplayMusic();
+
+        // Iniciar el WaveManager
+        WaveManager waveManager = FindFirstObjectByType<WaveManager>();
+        if (waveManager != null)
+            waveManager.StartGame();
+        else
+            Debug.LogError("WaveManager no encontrado!");
     }
 
     public void Ajustes()

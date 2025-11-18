@@ -15,6 +15,7 @@ public class MainMenu : MonoBehaviour
         menuPanel.SetActive(true);
         gameplayUI.SetActive(false);
         if (player != null) player.SetActive(false);
+        SoundManager.Instance.PlayMenuMusic();
     }
 
     public void Jugar()
@@ -24,6 +25,8 @@ public class MainMenu : MonoBehaviour
         menuPanel.SetActive(false);
         gameplayUI.SetActive(true);
         if (player != null) player.SetActive(true);
+
+        SoundManager.Instance.PlayGameMusic();
     }
 
     public void Ajustes()

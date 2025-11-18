@@ -29,6 +29,8 @@ public class PauseMenu : MonoBehaviour
         if (mainMenuPanel != null)
             mainMenuPanel.SetActive(false);
 
+        SoundManager.Instance.PlayMenuMusic();
+
         Debug.Log("Juego pausado.");
     }
 
@@ -40,6 +42,8 @@ public class PauseMenu : MonoBehaviour
         gameplayUI.SetActive(true);
         if (mainMenuPanel != null)
             mainMenuPanel.SetActive(false);
+
+        SoundManager.Instance.PlayMenuMusic();
 
         Debug.Log("Juego reanudado.");
     }

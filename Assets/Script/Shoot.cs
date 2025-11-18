@@ -14,6 +14,7 @@ public class Shoot : MonoBehaviour
         if (Input.GetMouseButton(0) && Time.time >= nextFireTime)
         {
             SpawnBullet();
+            SoundManager.Instance.PlayShoot();
             nextFireTime = Time.time + fireRate; // Espera hasta el siguiente disparo
         }
     }

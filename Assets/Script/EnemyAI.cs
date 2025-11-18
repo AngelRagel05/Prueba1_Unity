@@ -155,7 +155,7 @@ public class EnemyAI : MonoBehaviour
         {
             Debug.LogWarning($"[EnemyAI] {enemyType} murió sin WaveManager asignado.");
         }
-
+        SoundManager.Instance.PlayEnemyDeath();
         Destroy(gameObject);
     }
 }

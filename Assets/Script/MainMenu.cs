@@ -48,8 +48,7 @@ public class MainMenu : MonoBehaviour
     {
         Debug.Log("[MainMenu] Jugar presionado, iniciando partida...");
 
-        // Reanudar juego
-        ResumeGame();
+        Time.timeScale = 1f; // Asegurarse de que el juego no esté pausado
 
         menuPanel.SetActive(false);
         gameplayUI.SetActive(true);

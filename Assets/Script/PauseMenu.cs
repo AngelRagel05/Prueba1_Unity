@@ -23,13 +23,17 @@ public class PauseMenu : MonoBehaviour
     public void PauseGame()
     {
         isPaused = true;
-        Time.timeScale = 0f; // Pausa la física y animaciones
+        Time.timeScale = 0f;
         pausePanel.SetActive(true);
         gameplayUI.SetActive(false);
         if (mainMenuPanel != null)
             mainMenuPanel.SetActive(false);
 
-        SoundManager.Instance.PlayMenuMusic();
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PauseMusic();           // ← PAUSAR música gameplay
+            SoundManager.Instance.PlayPauseMusic();       // ← REPRODUCIR música menú (NUEVO MÉTODO)
+        }
 
         Debug.Log("Juego pausado.");
     }
@@ -37,13 +41,19 @@ public class PauseMenu : MonoBehaviour
     public void ResumeGame()
     {
         isPaused = false;
-        Time.timeScale = 1f; // Reanuda todo
+        Time.timeScale = 1f;
         pausePanel.SetActive(false);
         gameplayUI.SetActive(true);
         if (mainMenuPanel != null)
             mainMenuPanel.SetActive(false);
 
-        SoundManager.Instance.PlayMenuMusic();
+        if (SoundManager.Instance != null)
+        {
+            // Primero detener completamente la música del menú
+            SoundManager.Instance.musicSource.Stop();
+            // Luego reanudar la música de gameplay
+            SoundManager.Instance.ResumeMusic();
+        }
 
         Debug.Log("Juego reanudado.");
     }

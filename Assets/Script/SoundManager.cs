@@ -25,6 +25,11 @@ public class SoundManager : MonoBehaviour
     private int currentTrackIndex = 0;
     private Coroutine musicCoroutine;
 
+    // Variables para guardar el estado de la música
+    private bool wasPlayingGameplayMusic = false;
+    private float savedMusicTime = 0f;
+    private int savedTrackIndex = 0;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -39,13 +44,12 @@ public class SoundManager : MonoBehaviour
 
     private void Start()
     {
-        // Validar que los AudioSource existan
         if (musicSource == null)
         {
             Debug.LogWarning("SoundManager: musicSource no asignado!");
             musicSource = gameObject.AddComponent<AudioSource>();
         }
-        
+
         if (sfxSource == null)
         {
             Debug.LogWarning("SoundManager: sfxSource no asignado!");
@@ -59,13 +63,28 @@ public class SoundManager : MonoBehaviour
     {
         if (menuMusic == null || musicSource == null) return;
 
-        // Detener música anterior
+        // Detener la corrutina de gameplay si está activa
         if (musicCoroutine != null)
         {
             StopCoroutine(musicCoroutine);
             musicCoroutine = null;
         }
 
+        musicSource.Stop();
+        musicSource.clip = menuMusic;
+        musicSource.loop = true;
+        musicSource.Play();
+
+        wasPlayingGameplayMusic = false; // Solo aquí reseteamos
+    }
+
+    public void PlayPauseMusic()
+    {
+        if (menuMusic == null || musicSource == null) return;
+
+        // NO detener la corrutina ni cambiar wasPlayingGameplayMusic
+        // Solo cambiar temporalmente a música de menú
+        musicSource.Stop();
         musicSource.clip = menuMusic;
         musicSource.loop = true;
         musicSource.Play();
@@ -76,10 +95,13 @@ public class SoundManager : MonoBehaviour
         if (gameplayMusic.Count == 0 || musicSource == null) return;
 
         currentTrackIndex = 0;
-        
+        savedTrackIndex = 0;
+        savedMusicTime = 0f;
+
         if (musicCoroutine != null)
             StopCoroutine(musicCoroutine);
-            
+
+        wasPlayingGameplayMusic = true;
         musicCoroutine = StartCoroutine(PlayMusicLoop());
     }
 
@@ -92,13 +114,52 @@ public class SoundManager : MonoBehaviour
 
             musicSource.clip = gameplayMusic[currentTrackIndex];
             musicSource.loop = false;
+            musicSource.time = savedMusicTime;
             musicSource.Play();
 
-            yield return new WaitForSeconds(musicSource.clip.length);
+            savedMusicTime = 0f;
+
+            yield return new WaitForSeconds(musicSource.clip.length - musicSource.time);
 
             currentTrackIndex++;
             if (currentTrackIndex >= gameplayMusic.Count)
                 currentTrackIndex = 0;
+        }
+    }
+
+    public void PauseMusic()
+    {
+        if (musicSource == null) return;
+
+        if (musicSource.isPlaying)
+        {
+            if (wasPlayingGameplayMusic)
+            {
+                savedMusicTime = musicSource.time;
+                savedTrackIndex = currentTrackIndex;
+            }
+
+            musicSource.Pause();
+        }
+    }
+
+    public void ResumeMusic()
+    {
+        if (musicSource == null) return;
+
+        if (wasPlayingGameplayMusic)
+        {
+            musicSource.Stop();
+            currentTrackIndex = savedTrackIndex;
+
+            if (musicCoroutine != null)
+                StopCoroutine(musicCoroutine);
+
+            musicCoroutine = StartCoroutine(PlayMusicLoop());
+        }
+        else if (!musicSource.isPlaying)
+        {
+            musicSource.UnPause();
         }
     }
 

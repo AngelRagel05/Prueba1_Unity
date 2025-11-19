@@ -94,6 +94,9 @@ public class SoundManager : MonoBehaviour
     {
         if (gameplayMusic.Count == 0 || musicSource == null) return;
 
+        // Mezclar la lista aleatoriamente al iniciar
+        ShufflePlaylist();
+
         currentTrackIndex = 0;
         savedTrackIndex = 0;
         savedMusicTime = 0f;
@@ -109,7 +112,7 @@ public class SoundManager : MonoBehaviour
     {
         while (true)
         {
-            if (musicSource == null || currentTrackIndex >= gameplayMusic.Count)
+            if (musicSource == null || gameplayMusic.Count == 0)
                 yield break;
 
             musicSource.clip = gameplayMusic[currentTrackIndex];
@@ -117,14 +120,37 @@ public class SoundManager : MonoBehaviour
             musicSource.time = savedMusicTime;
             musicSource.Play();
 
+            Debug.Log($"[SoundManager] Reproduciendo: {musicSource.clip.name}");
+
             savedMusicTime = 0f;
 
             yield return new WaitForSeconds(musicSource.clip.length - musicSource.time);
 
             currentTrackIndex++;
+
+            // Cuando terminan todas las canciones, mezclar de nuevo
             if (currentTrackIndex >= gameplayMusic.Count)
+            {
                 currentTrackIndex = 0;
+                ShufflePlaylist();
+                Debug.Log("[SoundManager] Playlist completada, mezclando de nuevo...");
+            }
         }
+    }
+
+    private void ShufflePlaylist()
+    {
+        if (gameplayMusic.Count <= 1) return;
+
+        for (int i = gameplayMusic.Count - 1; i > 0; i--)
+        {
+            int randomIndex = Random.Range(0, i + 1);
+            AudioClip temp = gameplayMusic[i];
+            gameplayMusic[i] = gameplayMusic[randomIndex];
+            gameplayMusic[randomIndex] = temp;
+        }
+
+        Debug.Log("[SoundManager] Playlist mezclada aleatoriamente");
     }
 
     public void PauseMusic()

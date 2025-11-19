@@ -7,6 +7,7 @@ public class MainMenu : MonoBehaviour
     public GameObject menuPanel;
     public GameObject gameplayUI;
     public GameObject player;
+    public GameObject settingsMenu;
 
     private void Start()
     {
@@ -67,7 +68,12 @@ public class MainMenu : MonoBehaviour
 
     public void Ajustes()
     {
-        Debug.Log("[MainMenu] Ajustes presionado (aún no implementado)");
+        Debug.Log("[MainMenu] Ajustes presionado");
+
+        if (settingsMenu != null)
+            settingsMenu.GetComponent<SettingsMenu>().OpenSettings(menuPanel);
+        else
+            Debug.LogError("SettingsMenu no asignado en MainMenu!");
     }
 
     public void Salir()

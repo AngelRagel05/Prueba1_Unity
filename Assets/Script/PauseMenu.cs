@@ -6,6 +6,7 @@ public class PauseMenu : MonoBehaviour
     public GameObject pausePanel;
     public GameObject gameplayUI;
     public GameObject mainMenuPanel;
+    public GameObject settingsMenu;
 
     private bool isPaused = false;
 
@@ -31,8 +32,8 @@ public class PauseMenu : MonoBehaviour
 
         if (SoundManager.Instance != null)
         {
-            SoundManager.Instance.PauseMusic();           // ← PAUSAR música gameplay
-            SoundManager.Instance.PlayPauseMusic();       // ← REPRODUCIR música menú (NUEVO MÉTODO)
+            SoundManager.Instance.PauseMusic();
+            SoundManager.Instance.PlayPauseMusic();
         }
 
         Debug.Log("Juego pausado.");
@@ -72,7 +73,11 @@ public class PauseMenu : MonoBehaviour
 
     public void OpenSettings()
     {
-        Debug.Log("Abrir ajustes (pendiente de implementar).");
-        // Aquí puedes abrir tu panel de ajustes o submenú
+        Debug.Log("Abriendo ajustes desde pausa...");
+
+        if (settingsMenu != null)
+            settingsMenu.GetComponent<SettingsMenu>().OpenSettings(pausePanel);
+        else
+            Debug.LogError("SettingsMenu no asignado en PauseMenu!");
     }
 }

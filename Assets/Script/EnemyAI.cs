@@ -64,7 +64,7 @@ public class EnemyAI : MonoBehaviour
                 break;
 
             case EnemyType.Colonel:
-                speed = 20f;
+                speed = 17.5f;
                 maxHealth = 250;
                 damage = 50;
                 break;
@@ -86,7 +86,7 @@ public class EnemyAI : MonoBehaviour
         {
             Die();
         }
-        
+
         if (player == null) return;
 
         Vector3 dir = (player.position - transform.position);

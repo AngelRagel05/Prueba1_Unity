@@ -1518,7 +1518,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82449f634bd399b48b5ca2c97b7b96d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 100
+  maxHealth: 200
 --- !u!96 &493120141
 TrailRenderer:
   serializedVersion: 3

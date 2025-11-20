@@ -3000,7 +3000,7 @@ MonoBehaviour:
   menuPanel: {fileID: 97651146}
   gameplayUI: {fileID: 1646270197}
   player: {fileID: 493120131}
-  settingsMenu: {fileID: 0}
+  settingsPanel: {fileID: 0}
 --- !u!4 &1106372407
 Transform:
   m_ObjectHideFlags: 0
@@ -3031,7 +3031,7 @@ MonoBehaviour:
   pausePanel: {fileID: 328099797}
   gameplayUI: {fileID: 1646270197}
   mainMenuPanel: {fileID: 97651146}
-  settingsMenu: {fileID: 0}
+  settingsPanel: {fileID: 0}
 --- !u!1 &1175881126
 GameObject:
   m_ObjectHideFlags: 0
@@ -3778,8 +3778,8 @@ GameObject:
   - component: {fileID: 1614233475}
   - component: {fileID: 1614233479}
   - component: {fileID: 1614233480}
-  - component: {fileID: 1614233481}
   - component: {fileID: 1614233482}
+  - component: {fileID: 1614233483}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -3909,21 +3909,7 @@ MonoBehaviour:
   menuPanel: {fileID: 97651146}
   gameplayUI: {fileID: 1646270197}
   player: {fileID: 493120131}
-  settingsMenu: {fileID: 1614233474}
---- !u!114 &1614233481
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1614233474}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68aaf46b1c4f736409bcfe2e893346a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SettingsMenu
   settingsPanel: {fileID: 140519155}
-  previousPanel: {fileID: 0}
 --- !u!114 &1614233482
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3939,7 +3925,22 @@ MonoBehaviour:
   pausePanel: {fileID: 328099797}
   gameplayUI: {fileID: 1646270197}
   mainMenuPanel: {fileID: 97651146}
-  settingsMenu: {fileID: 1614233474}
+  settingsPanel: {fileID: 140519155}
+--- !u!114 &1614233483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1614233474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be769b17591fb6a489d97fe29f92157e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SettingsManager
+  settingsPanel: {fileID: 140519155}
+  menuPanel: {fileID: 97651146}
+  pausePanel: {fileID: 328099797}
 --- !u!1 &1632105966
 GameObject:
   m_ObjectHideFlags: 0
@@ -4367,9 +4368,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1614233481}
-        m_TargetAssemblyTypeName: SettingsMenu, Assembly-CSharp
-        m_MethodName: CloseSettings
+      - m_Target: {fileID: 1614233483}
+        m_TargetAssemblyTypeName: SettingsManager, Assembly-CSharp
+        m_MethodName: Volver
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

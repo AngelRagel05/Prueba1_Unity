@@ -19,10 +19,11 @@ public class BulletBehaviour : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Enemy"))
+        EnemyAI enemy = collision.gameObject.GetComponent<EnemyAI>();
+        if (enemy != null)
         {
-            Destroy(collision.gameObject); // Destruye al enemigo
-            Destroy(gameObject);           // Destruye la bala
+            enemy.TakeDamage(50); // O la cantidad que quieras
+            Destroy(gameObject);  // Destruye la bala
         }
     }
 }

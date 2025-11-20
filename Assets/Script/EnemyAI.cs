@@ -81,6 +81,12 @@ public class EnemyAI : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // Chequeo de caída
+        if (transform.position.y < -10f) // ajusta -10 según tu nivel
+        {
+            Die();
+        }
+        
         if (player == null) return;
 
         Vector3 dir = (player.position - transform.position);

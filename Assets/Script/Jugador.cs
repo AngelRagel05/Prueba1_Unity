@@ -5,6 +5,8 @@ public class Jugador : MonoBehaviour
 {
     private Rigidbody rb;
     private Vector3 movementDirection;
+    private PlayerHealth playerHealth;
+    private Collider playerCollider;
 
     [Header("Movimiento")]
     [SerializeField] private float moveSpeed = 10f;
@@ -15,22 +17,24 @@ public class Jugador : MonoBehaviour
     [SerializeField] private float dashCooldown = 5f;
 
     private bool dashReadyLogged = false;
-
     private bool isDashing = false;
     private TrailRenderer trail;
 
-    // Barra de dash
     public bool CanDash => TimeUntilDash <= 0f;
-    public float TimeUntilDash { get; private set; } // tiempo restante
+    public float TimeUntilDash { get; private set; }
     public float DashCooldown => dashCooldown;
+    public bool IsDashing => isDashing;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         trail = GetComponent<TrailRenderer>();
+        playerHealth = GetComponent<PlayerHealth>();
+        playerCollider = GetComponent<Collider>();
+        
         if (trail != null) trail.emitting = false;
 
-        TimeUntilDash = 0f; // dash listo al inicio
+        TimeUntilDash = 0f;
     }
 
     void Update()
@@ -42,7 +46,7 @@ public class Jugador : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && CanDash && movementDirection != Vector3.zero)
         {
             StartCoroutine(Dash());
-            dashReadyLogged = false; // reseteamos el flag cuando usamos el dash
+            dashReadyLogged = false;
         }
 
         if (TimeUntilDash > 0f)
@@ -52,42 +56,56 @@ public class Jugador : MonoBehaviour
                 TimeUntilDash = 0f;
         }
 
-        // Log solo la primera vez que el dash se vuelve listo
         if (CanDash && !dashReadyLogged)
         {
             Debug.Log("[Jugador] Dash listo!");
             dashReadyLogged = true;
         }
-
     }
 
     void FixedUpdate()
     {
         if (!isDashing)
-            rb.linearVelocity = movementDirection * moveSpeed;
+        {
+            // Mantener la velocidad Y (gravedad)
+            Vector3 velocity = movementDirection * moveSpeed;
+            velocity.y = rb.linearVelocity.y;
+            rb.linearVelocity = velocity;
+        }
     }
 
     private IEnumerator Dash()
     {
         isDashing = true;
-        TimeUntilDash = dashCooldown; // inicia cooldown
+        TimeUntilDash = dashCooldown;
 
-        if (SoundManager.Instance != null) SoundManager.Instance.PlayDash();
+        if (SoundManager.Instance != null) 
+            SoundManager.Instance.PlayDash();
 
-        Debug.Log("[Jugador] Dash usado! Iniciando cooldown.");
+        Debug.Log("[Jugador] Dash usado! Atravesando enemigos.");
+
+        // Desactivar colisiones con enemigos
+        Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), true);
 
         if (trail != null)
             trail.emitting = true;
 
         Vector3 dashDir = movementDirection;
-        if (dashDir == Vector3.zero) dashDir = transform.forward;
+        if (dashDir == Vector3.zero) 
+            dashDir = transform.forward;
 
         rb.linearVelocity = dashDir * dashForce;
 
         yield return new WaitForSeconds(dashDuration);
 
         isDashing = false;
+        
+        // Reactivar colisiones con enemigos
+        Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), false);
+
         if (trail != null)
             trail.emitting = false;
+
+        Debug.Log("[Jugador] Dash terminado. Colisiones restauradas.");
     }
 }

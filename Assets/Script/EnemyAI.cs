@@ -82,7 +82,7 @@ public class EnemyAI : MonoBehaviour
     private void FixedUpdate()
     {
         // Chequeo de caída
-        if (transform.position.y < -10f) // ajusta -10 según tu nivel
+        if (transform.position.y < -10f)
         {
             Die();
         }
@@ -108,13 +108,7 @@ public class EnemyAI : MonoBehaviour
 
         if (other.CompareTag("Player") && !_hasBeenHitRecently)
         {
-            var ph = other.GetComponent<PlayerHealth>();
-            if (ph != null)
-            {
-                ph.TakeDamage(damage);
-                Debug.Log($"[EnemyAI] {enemyType} hizo {damage} daño al jugador (Trigger).");
-                StartCoroutine(HandleSingleHit());
-            }
+            TryDamagePlayer(other.gameObject);
         }
     }
 
@@ -122,14 +116,36 @@ public class EnemyAI : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player") && !_hasBeenHitRecently)
         {
-            var ph = collision.gameObject.GetComponent<PlayerHealth>();
-            if (ph != null)
-            {
-                ph.TakeDamage(damage);
-                Debug.Log($"[EnemyAI] {enemyType} hizo {damage} daño al jugador (Collision).");
-                StartCoroutine(HandleSingleHit());
-            }
+            TryDamagePlayer(collision.gameObject);
         }
+    }
+
+    // Nuevo método centralizado para intentar hacer daño al jugador
+    private void TryDamagePlayer(GameObject playerObject)
+    {
+        var ph = playerObject.GetComponent<PlayerHealth>();
+        var jugador = playerObject.GetComponent<Jugador>();
+
+        if (ph == null) return;
+
+        // ✅ Verificar si el jugador es invulnerable
+        if (ph.IsInvulnerable)
+        {
+            Debug.Log($"[EnemyAI] {enemyType} no puede dañar al jugador (invulnerable tras golpe).");
+            return;
+        }
+
+        // ✅ Verificar si el jugador está en dash
+        if (jugador != null && jugador.IsDashing)
+        {
+            Debug.Log($"[EnemyAI] {enemyType} no puede dañar al jugador (está en dash).");
+            return;
+        }
+
+        // Si no es invulnerable, aplicar daño
+        ph.TakeDamage(damage);
+        Debug.Log($"[EnemyAI] {enemyType} hizo {damage} daño al jugador.");
+        StartCoroutine(HandleSingleHit());
     }
 
     private IEnumerator HandleSingleHit()
@@ -162,7 +178,8 @@ public class EnemyAI : MonoBehaviour
             Debug.LogWarning($"[EnemyAI] {enemyType} murió sin WaveManager asignado.");
         }
 
-        if (SoundManager.Instance != null) SoundManager.Instance.PlayEnemyDeath();
+        if (SoundManager.Instance != null) 
+            SoundManager.Instance.PlayEnemyDeath();
 
         Destroy(gameObject);
     }

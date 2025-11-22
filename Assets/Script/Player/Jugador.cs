@@ -67,7 +67,6 @@ public class Jugador : MonoBehaviour
     {
         if (!isDashing)
         {
-            // Mantener la velocidad Y (gravedad)
             Vector3 velocity = movementDirection * moveSpeed;
             velocity.y = rb.linearVelocity.y;
             rb.linearVelocity = velocity;
@@ -84,8 +83,16 @@ public class Jugador : MonoBehaviour
 
         Debug.Log("[Jugador] Dash usado! Atravesando enemigos.");
 
-        // Desactivar colisiones con enemigos
-        Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), true);
+        // Ignorar colisiones con todos los enemigos
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject enemy in enemies)
+        {
+            Collider enemyCollider = enemy.GetComponent<Collider>();
+            if (enemyCollider != null && playerCollider != null)
+            {
+                Physics.IgnoreCollision(playerCollider, enemyCollider, true);
+            }
+        }
 
         if (trail != null)
             trail.emitting = true;
@@ -100,8 +107,18 @@ public class Jugador : MonoBehaviour
 
         isDashing = false;
         
-        // Reactivar colisiones con enemigos
-        Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), false);
+        // Restaurar colisiones con todos los enemigos
+        foreach (GameObject enemy in enemies)
+        {
+            if (enemy != null) // Verificar que el enemigo no haya sido destruido
+            {
+                Collider enemyCollider = enemy.GetComponent<Collider>();
+                if (enemyCollider != null && playerCollider != null)
+                {
+                    Physics.IgnoreCollision(playerCollider, enemyCollider, false);
+                }
+            }
+        }
 
         if (trail != null)
             trail.emitting = false;

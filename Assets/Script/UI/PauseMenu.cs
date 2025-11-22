@@ -50,7 +50,7 @@ public class PauseMenu : MonoBehaviour
 
         if (SoundManager.Instance != null)
         {
-            SoundManager.Instance.musicSource.Stop();
+            // SoundManager.Instance.musicSource.Stop();
             SoundManager.Instance.ResumeMusic();
         }
 

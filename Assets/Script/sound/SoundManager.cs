@@ -29,6 +29,9 @@ public class SoundManager : MonoBehaviour
     private bool wasPlayingGameplayMusic = false;
     private float savedMusicTime = 0f;
     private int savedTrackIndex = 0;
+    
+    // Variable para controlar la música de pausa
+    private AudioSource pauseMusicSource;
 
     private void Awake()
     {
@@ -56,6 +59,10 @@ public class SoundManager : MonoBehaviour
             sfxSource = gameObject.AddComponent<AudioSource>();
         }
 
+        // Crear un AudioSource separado para la música de pausa
+        pauseMusicSource = gameObject.AddComponent<AudioSource>();
+        pauseMusicSource.loop = true;
+
         PlayMenuMusic();
     }
 
@@ -75,24 +82,28 @@ public class SoundManager : MonoBehaviour
         musicSource.loop = true;
         musicSource.Play();
 
-        wasPlayingGameplayMusic = false; // Solo aquí reseteamos
+        wasPlayingGameplayMusic = false;
     }
 
     public void PlayPauseMusic()
     {
-        if (menuMusic == null || musicSource == null) return;
+        if (menuMusic == null || pauseMusicSource == null) return;
 
-        // NO detener la corrutina ni cambiar wasPlayingGameplayMusic
-        // Solo cambiar temporalmente a música de menú
-        musicSource.Stop();
-        musicSource.clip = menuMusic;
-        musicSource.loop = true;
-        musicSource.Play();
+        // Usar el AudioSource separado para la música de pausa
+        // NO tocar el musicSource principal
+        pauseMusicSource.clip = menuMusic;
+        pauseMusicSource.Play();
+        
+        Debug.Log("[SoundManager] Música de pausa iniciada (AudioSource separado)");
     }
 
     public void StartGameplayMusic()
     {
         if (gameplayMusic.Count == 0 || musicSource == null) return;
+
+        // Detener música de pausa si está sonando
+        if (pauseMusicSource != null && pauseMusicSource.isPlaying)
+            pauseMusicSource.Stop();
 
         // Mezclar la lista aleatoriamente al iniciar
         ShufflePlaylist();
@@ -120,7 +131,7 @@ public class SoundManager : MonoBehaviour
             musicSource.time = savedMusicTime;
             musicSource.Play();
 
-            Debug.Log($"[SoundManager] Reproduciendo: {musicSource.clip.name}");
+            Debug.Log($"[SoundManager] Reproduciendo: {musicSource.clip.name} desde {savedMusicTime:F1}s");
 
             savedMusicTime = 0f;
 
@@ -128,7 +139,6 @@ public class SoundManager : MonoBehaviour
 
             currentTrackIndex++;
 
-            // Cuando terminan todas las canciones, mezclar de nuevo
             if (currentTrackIndex >= gameplayMusic.Count)
             {
                 currentTrackIndex = 0;
@@ -157,15 +167,13 @@ public class SoundManager : MonoBehaviour
     {
         if (musicSource == null) return;
 
-        if (musicSource.isPlaying)
+        if (musicSource.isPlaying && wasPlayingGameplayMusic)
         {
-            if (wasPlayingGameplayMusic)
-            {
-                savedMusicTime = musicSource.time;
-                savedTrackIndex = currentTrackIndex;
-            }
-
+            savedMusicTime = musicSource.time;
+            savedTrackIndex = currentTrackIndex;
             musicSource.Pause();
+            
+            Debug.Log($"[SoundManager] Música pausada en {savedMusicTime:F1}s, track {savedTrackIndex}");
         }
     }
 
@@ -173,15 +181,18 @@ public class SoundManager : MonoBehaviour
     {
         if (musicSource == null) return;
 
+        // Detener música de pausa
+        if (pauseMusicSource != null && pauseMusicSource.isPlaying)
+        {
+            pauseMusicSource.Stop();
+            Debug.Log("[SoundManager] Música de pausa detenida");
+        }
+
         if (wasPlayingGameplayMusic)
         {
-            musicSource.Stop();
-            currentTrackIndex = savedTrackIndex;
-
-            if (musicCoroutine != null)
-                StopCoroutine(musicCoroutine);
-
-            musicCoroutine = StartCoroutine(PlayMusicLoop());
+            // Reanudar desde donde estaba
+            musicSource.UnPause();
+            Debug.Log($"[SoundManager] Música de gameplay reanudada desde {savedMusicTime:F1}s");
         }
         else if (!musicSource.isPlaying)
         {

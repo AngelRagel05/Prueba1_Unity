@@ -98,6 +98,7 @@ public class EnemyAI : MonoBehaviour
             transform.rotation = Quaternion.LookRotation(dir);
     }
 
+    // Detectar balas (si las balas son trigger)
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Bullet"))
@@ -105,13 +106,9 @@ public class EnemyAI : MonoBehaviour
             TakeDamage(50);
             Destroy(other.gameObject);
         }
-
-        if (other.CompareTag("Player") && !_hasBeenHitRecently)
-        {
-            TryDamagePlayer(other.gameObject);
-        }
     }
 
+    // Detectar colisión con el player
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Player") && !_hasBeenHitRecently)
@@ -120,7 +117,15 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    // Nuevo método centralizado para intentar hacer daño al jugador
+    // Detectar si el player se queda dentro del enemigo (durante dash como trigger)
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Player") && !_hasBeenHitRecently)
+        {
+            TryDamagePlayer(other.gameObject);
+        }
+    }
+
     private void TryDamagePlayer(GameObject playerObject)
     {
         var ph = playerObject.GetComponent<PlayerHealth>();
